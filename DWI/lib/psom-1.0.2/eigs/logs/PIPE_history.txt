@@ -1,0 +1,23 @@
+
+***********************************************
+The pipeline PIPE is now being processed.
+Started on 24-Jun-2019 16:57:23
+user: proactionlab, host: noether, system: unix
+***********************************************
+24-Jun-2019 16:57:23 d1 submitted (1 run / 0 fail / 0 done / 4 left)
+24-Jun-2019 16:57:23 d2 submitted (2 run / 0 fail / 0 done / 3 left)
+24-Jun-2019 16:57:23 d3 submitted (3 run / 0 fail / 0 done / 2 left)
+24-Jun-2019 16:57:23 d4 submitted (4 run / 0 fail / 0 done / 1 left)
+24-Jun-2019 16:57:23 d5 submitted (5 run / 0 fail / 0 done / 0 left)
+24-Jun-2019 16:58:03 d1 completed (4 run / 0 fail / 1 done / 0 left)
+24-Jun-2019 16:58:03 d2 completed (3 run / 0 fail / 2 done / 0 left)
+24-Jun-2019 16:58:03 d3 completed (2 run / 0 fail / 3 done / 0 left)
+24-Jun-2019 16:58:03 d4 completed (1 run / 0 fail / 4 done / 0 left)
+24-Jun-2019 16:58:03 d5 completed (0 run / 0 fail / 5 done / 0 left)
+
+*********************************************
+The processing of the pipeline is terminated.
+See report below for job completion status.
+24-Jun-2019 16:58:03
+*********************************************
+All jobs have been successfully completed.
