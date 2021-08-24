@@ -1,0 +1,37 @@
+
+
+0.1) Follow instructions in fmriprep_aroma_setup to set a proper enviroment of work.
+
+0.2) Organize your data in bids format
+
+1) Open a new terminal and type:
+
+- newgrp docker
+
+- source activate fmriprep_aroma
+
+2) Change your directory to fmriprep_docker_lib (where the main code is contained). For instance:
+
+- cd /maismemoria/code/Guilherme/fmriprep_docker_lib
+
+3) open script 'run_fmriprep_docker.py' and edit the following variables:
+
+	a) bids_root --> Path to bids root directory containing your data. If your data is stored in a external device, check fmriprep_aroma_setup section C to properly mount the device with docker. 
+
+	Example: 
+	My data is stored in '/media/proactionlab/HD-2Tb/Guilherme/DATA/DATA_func_memoria/new_proc_maismemoria/bids' (which is an external device).
+	Nevertheless, docker only recognizes the path in which the drive was mounted, which is: '/mnt/usb/Guilherme/DATA/DATA_func_memoria/new_proc_maismemoria/bids', see how to mount a device in 'fmriprep_aroma_setup'.Therefore, I should set the bids_root variable as:
+	
+	bids_root = '/mnt/usb/Guilherme/DATA/DATA_func_memoria/new_proc_maismemoria/bids'
+	
+
+	b) BidsIDs --> Can be specified as a list of strings in which each entry is a bids_id or simply the option 'All' to preprocess all subjects in the bids_root folder.
+
+	c) Ndummies --> Set number of volumes that will be removed from the analysis. E.g. Ndummies = 5, removes the first 5 volumes (TRs)
+
+	d) nthreads --> Set number of cores will be used for each subject if cores are available. 
+
+	e) Npools --> Set number of cores will be used.
+
+	f) work_path --> set the path where fmriprep will store internal files
+

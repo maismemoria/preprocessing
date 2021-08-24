@@ -1,0 +1,10 @@
+# README #
+
+### Directory description ###
+
+This directory contains data from the +Memoria project organized in the BIDS structure. For more information about the BIDS structure check: https://bids.neuroimaging.io/.
+
+### Data description ###
+
+Data consists of rs-fMRI and anatomical T1 weighted images separated in groups: CB, SHAM, DLPFC, WL. In addition, subjects were scanned in three different sessions: pre stimulus (session 1); pos stimulus (session 2); follow-up (session 3).
+
