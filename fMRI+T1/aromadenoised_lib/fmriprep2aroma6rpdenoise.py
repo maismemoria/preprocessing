@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-def fmriprep2aromadenoise(bidsdir):
+def fmriprep2aroma6rpdenoise(bidsdir):
 
    import time
    import os, glob
    import numpy as np
    from nibabel import load
-   #from nipype.utils.config import NUMPY_MMAP                 MODIFIED GUILHERME
+   from nipype.utils.config import NUMPY_MMAP                 
    from nipype.interfaces.afni import TProject
    from nipype.interfaces.fsl.utils import FilterRegressor
    from niworkflows.interfaces.utils import _tpm2roi
@@ -17,9 +17,12 @@ def fmriprep2aromadenoise(bidsdir):
    rootoutdir = bidsdir + '/derivatives/aromadenoised'
    
    # select all files to be denoised
-   alldatapath  = glob.glob(bidsdir+'/derivatives/fmriprep'+
-              '/*/*/func/*space-MNI152NLin2009cAsym_desc-preproc*.nii*') 
+   alldatapath = glob.glob(bidsdir+'/derivatives/fmriprep'+
+               '/*/*/func/*space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz') 
    
+   # alldatapath = glob.glob(bidsdir+'/derivatives/fmriprep'+
+   #    '/*/*/func/*space-MNI152NLin2009cAsym_desc-preproc_bold_smooth-6mm.nii*')
+                           
    # overwrite contents previouly calculated
    overwrite = True
    
@@ -58,31 +61,33 @@ def fmriprep2aromadenoise(bidsdir):
       # make subject output directory, if none exists
       if not os.path.isdir(outdir): os.makedirs(outdir)
       
-      #*_, timepoints = load(datapath, mmap=NUMPY_MMAP).shape MODIFIED GUILHERME
+      #*_, timepoints = load(datapath, mmap=NUMPY_MMAP).shape
       *_, timepoints = load(datapath).shape
       
       #select columns of confound tsv to reduce based upon
       
       tmparomapath = (outdir+os.path.sep+'_tmparoma_'+datafilename+dataext)
       
-      physconfpath = (outdir+os.path.sep+dataid+'pos-aroma_phys-confounds_regressors.tsv')      
-      
-      
+      physconfpath = (outdir+os.path.sep+dataid+'pos-aroma_phys-6rp-confounds_regressors.tsv')      
+            
       wmmaskpath = (outdir+os.path.sep+tpmwmfilename+'_roi'+tpmwmext)
       
       csfmaskpath = (outdir+os.path.sep+tpmcsffilename+'_roi'+tpmcsfext)   
       
       melodicpath = glob.glob(funcdir+os.path.sep+'*MELODIC*')[0]
       
+      confoundspath = glob.glob(funcdir+os.path.sep+'*confounds_regressors.tsv')[0]
+      
       aromanoise = list(np.loadtxt(glob.glob(funcdir+os.path.sep+
                         '*AROMAnoiseICs*')[0],delimiter=',').astype('int'))
       
       # Performs the non-aggressive AROMA remotion for MNI2009
       if (not os.path.isfile(tmparomapath) or overwrite):
-         FilterRegressor(design_file=melodicpath, filter_columns=aromanoise,
-                         in_file=datapath, mask=funcmaskpath,
-                         out_file=tmparomapath).run()
+          FilterRegressor(design_file=melodicpath, filter_columns=aromanoise,
+                          in_file=datapath, mask=funcmaskpath,
+                          out_file=tmparomapath).run()
       
+      # Calculates the CSF and WM temporal series after AROMA
       if (not os.path.isfile(wmmaskpath) or overwrite):
          _tpm2roi(erosion_mm=0, mask_erosion_mm=30, in_tpm=tpmcsfpath,
                   in_mask=anatmaskpath, newpath=outdir)
@@ -101,17 +106,31 @@ def fmriprep2aromadenoise(bidsdir):
    #      
    #      physconf_aroma = np.concatenate((csfts, wmts, gsts), axis=1)
          
-         physconf_aroma = np.concatenate((csfts, wmts), axis=1)
+         #--------------------------------------------------------------------
+         # Select the six regression parameters from motion corretion
+         f = open(confoundspath)
+         header = f.readline()
+         h = header.split('\t')
+         rplist = list(['trans_x','trans_y','trans_z','rot_x','rot_y','rot_z'])
+         
+         rpidx = []
+         for rpname in rplist:
+            rpidx.append(h.index(rpname))
+         
+         rp = np.loadtxt(confoundspath, delimiter='\t', skiprows=1,usecols=rpidx)
+         #--------------------------------------------------------------------
+         
+         physconf_aroma = np.concatenate((csfts, wmts, rp), axis=1)
          
          # header='CSF\tWhiteMatter\tGlobalSignal' for saving gsts
          np.savetxt(physconfpath, physconf_aroma,
-                    header='CSF\tWhiteMatter',
+                    header='CSF\tWhiteMatter\ttrans_x\ttrans_y\ttrans_z\trot_x\trot_y\trot_z',
                     comments='', delimiter='\t')
          
                
          outdatapath = outdir+os.path.sep+datafilename+'_02P-aroma-denoised'+dataext
          
-         # Performs the regression to remove the Phys conf using ANFI
+         # Performs the regression to remove the Phys and 6RP using ANFI
          if (not os.path.isfile(outdatapath) or overwrite):
             if os.path.isfile(outdatapath):
                os.remove(outdatapath)
